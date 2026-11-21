@@ -3,12 +3,14 @@
 #include <stdbool.h>
 #include <assert.h>
 
-typedef enum {
-    PIN1,
-    PIN2
-} PINS;
-
 typedef struct{
+
+    // Here we need to have the following
+    //leftAttachedPinToNode
+    int left; // Left pin attached to node id
+    int right; // Right pin attached to node id
+
+    char* Name;
 
     float R; // Resistant
     float V; // Voltage
@@ -21,69 +23,58 @@ typedef struct{
 } Ohms_Law_Componet;
 
 typedef struct{
-
-    PINS attachedPin;
-    Ohms_Law_Componet Componet;
-
-} ComponetMetadata;
-
-typedef struct{
-
-    ComponetMetadata * ComponetsMetadata;
-
+    int id;
+    Ohms_Law_Componet * Componets;
 } Node;
 
-void printComponetMetadata(ComponetMetadata ComponetMetadata){
-    printf("Attached PIN:%d\n",ComponetMetadata.attachedPin);
-    printf("Componet Resistant: %f\n",ComponetMetadata.Componet.R);
-    printf("Componet Voltage: %f\n",ComponetMetadata.Componet.V);
-    printf("Componet Current: %f\n",ComponetMetadata.Componet.I);
+void printSepLine(void){
+    for(size_t i = 0; i < 35;++i){
+        printf("=");
+    }
+    printf("\n");
+}
+
+void printComponetMetadata(Ohms_Law_Componet Componet){
+    
+    printSepLine();
+    printf("Componet: %s\n",Componet.Name);
+    printf("Componet Resistant: %f\n",Componet.R);
+    printf("Componet Voltage: %f\n",Componet.V);
+    printf("Componet Current: %f\n",Componet.I);
+
+    printf("Left  : NodeId_%d\n",Componet.left);
+    printf("Right : NodeId_%d\n",Componet.right);
+    printSepLine();
 
 }
 
 int main()
 {
-    PINS left = PIN1;
-    PINS right = PIN2;
-
     // NODE 1 - Upper NODE
     Node * node1 = malloc(sizeof(Node));
     assert(node1 != NULL);
+    node1->id = 1;
 
-    node1->ComponetsMetadata = malloc(sizeof(ComponetMetadata)*2);
-    assert(node1->ComponetsMetadata != NULL);
+    node1->Componets = malloc(sizeof(Ohms_Law_Componet)*2);
+    assert(node1->Componets != NULL);
 
     // NODE 2 - Lower NODE
     Node * node2 = malloc(sizeof(Node));
     assert(node2 != NULL);
+    node2->id = 2;
 
-    node2->ComponetsMetadata = malloc(sizeof(ComponetMetadata)*2);
-    assert(node2->ComponetsMetadata != NULL);
+
+    node2->Componets = malloc(sizeof(Ohms_Law_Componet)*2);
+    assert(node2->Componets != NULL);
 
     // Resistan - Load
-    Ohms_Law_Componet resistant = {1.0,-1,-1,true,false,false};
-    ComponetMetadata resistantMetadataNode1 = {left,resistant};
-    ComponetMetadata resistantMetadataNode2 = {right,resistant};
-
+    Ohms_Law_Componet resistant = {node1->id,node2->id,"R1",1.0,-1,-1,true,false,false};
 
     // DC Source - Source
-    Ohms_Law_Componet DC_Source = {0.05,5.0,0.2,true,true,true};
-    ComponetMetadata DC_SourceMetadataNode1 = {left,DC_Source};
-    ComponetMetadata DC_SourceMetadataNode2 = {left,DC_Source};
+    Ohms_Law_Componet DC_Source = {node1->id,node2->id,"DC",0.05,5.0,0.2,true,true,true};
 
-    // Connect the left pin of source and resistant
-    node1->ComponetsMetadata[0] = resistantMetadataNode1;
-    node1->ComponetsMetadata[1] = DC_SourceMetadataNode1;
-
-    // Connnect the right pin of source and resistant
-    node2->ComponetsMetadata[0] = resistantMetadataNode2;
-    node2->ComponetsMetadata[1] = DC_SourceMetadataNode2;
-
-    for(size_t i = 0; i < 2; ++i){
-       printComponetMetadata(node1->ComponetsMetadata[i]);
-       printf("===\n\n");
-
-    }
+    printComponetMetadata(resistant);
+    printComponetMetadata(DC_Source);
 
     printf("Hello World\n");
     return 0;
